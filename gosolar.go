@@ -3,6 +3,7 @@ package gosolar
 import (
 	"bytes"
 	"crypto/tls"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,14 +40,14 @@ func NewClient(host, user, pass string, ignoreSSL bool) *Client {
 	}
 }
 
-func (c *Client) post(endpoint string, body interface{}) ([]byte, error) {
+func (c *Client) post(ctx context.Context, endpoint string, body interface{}) ([]byte, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request: %v", err)
 	}
 
-	req, err := http.NewRequest("POST", c.URL+endpoint, &buf)
+	req, err := http.NewRequestWithContext(ctx, "POST", c.URL+endpoint, &buf)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new request: %v", err)
 	}
@@ -72,8 +73,8 @@ func (c *Client) post(endpoint string, body interface{}) ([]byte, error) {
 	return output, nil
 }
 
-func (c *Client) get(endpoint string) ([]byte, error) {
-	req, err := http.NewRequest("GET", c.URL+endpoint, nil)
+func (c *Client) get(ctx context.Context, endpoint string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", c.URL+endpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new request: %v", err)
 	}
@@ -106,7 +107,7 @@ func (c *Client) get(endpoint string) ([]byte, error) {
 }
 
 // Query retrieves a result from the SolarWinds API.
-func (c *Client) Query(query string, parameters interface{}) ([]byte, error) {
+func (c *Client) Query(ctx context.Context, query string, parameters interface{}) ([]byte, error) {
 	req := struct {
 		Query      string      `json:"query"`
 		Parameters interface{} `json:"parameters"`
@@ -115,7 +116,7 @@ func (c *Client) Query(query string, parameters interface{}) ([]byte, error) {
 		Parameters: parameters,
 	}
 
-	result, err := c.post("Query", &req)
+	result, err := c.post(ctx, "Query", &req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query: %v", err)
 	}
@@ -133,8 +134,8 @@ func (c *Client) Query(query string, parameters interface{}) ([]byte, error) {
 }
 
 // QueryOne wraps QueryRow which wraps post and extracts a single value.
-func (c *Client) QueryOne(query string, parameters interface{}) (interface{}, error) {
-	res, err := c.QueryRow(query, parameters)
+func (c *Client) QueryOne(ctx context.Context, query string, parameters interface{}) (interface{}, error) {
+	res, err := c.QueryRow(ctx, query, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -155,8 +156,8 @@ func (c *Client) QueryOne(query string, parameters interface{}) (interface{}, er
 }
 
 // QueryRow wraps query and pulls a single row from the result.
-func (c *Client) QueryRow(query string, parameters interface{}) ([]byte, error) {
-	res, err := c.Query(query, parameters)
+func (c *Client) QueryRow(ctx context.Context, query string, parameters interface{}) ([]byte, error) {
+	res, err := c.Query(ctx, query, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -165,8 +166,8 @@ func (c *Client) QueryRow(query string, parameters interface{}) ([]byte, error) 
 }
 
 // QueryColumn wraps Query and pulls a single column of values into a slice of maps.
-func (c *Client) QueryColumn(query string, parameters interface{}) ([]interface{}, error) {
-	res, err := c.Query(query, parameters)
+func (c *Client) QueryColumn(ctx context.Context, query string, parameters interface{}) ([]interface{}, error) {
+	res, err := c.Query(ctx, query, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -188,35 +189,35 @@ func (c *Client) QueryColumn(query string, parameters interface{}) ([]interface{
 }
 
 // Create calls the create endpoint and passes the entity and body.
-func (c *Client) Create(entity, body interface{}) ([]byte, error) {
+func (c *Client) Create(ctx context.Context, entity, body interface{}) ([]byte, error) {
 	endpoint := fmt.Sprintf("Create/%s", entity)
 
-	return c.post(endpoint, body)
+	return c.post(ctx, endpoint, body)
 }
 
-func (c *Client) Read(uri string) ([]byte, error) {
-	return c.get(uri)
+func (c *Client) Read(ctx context.Context, uri string) ([]byte, error) {
+	return c.get(ctx, uri)
 }
 
 // Invoke calls the invoke endpoint with the entity and verb along with a body.
-func (c *Client) Invoke(entity, verb string, body interface{}) ([]byte, error) {
+func (c *Client) Invoke(ctx context.Context, entity, verb string, body interface{}) ([]byte, error) {
 	endpoint := fmt.Sprintf("Invoke/%s/%s", entity, verb)
 
-	return c.post(endpoint, body)
+	return c.post(ctx, endpoint, body)
 }
 
 // BulkDelete wraps post and send a slice of URIs to delete.
-func (c *Client) BulkDelete(uris []string) ([]byte, error) {
+func (c *Client) BulkDelete(ctx context.Context, uris []string) ([]byte, error) {
 	req := map[string][]string{
 		"uris": uris,
 	}
 
-	return c.post("BulkDelete", req)
+	return c.post(ctx, "BulkDelete", req)
 }
 
 // Delete wraps post and uses the DELETE method to delete an entity.
-func (c *Client) Delete(uri string) ([]byte, error) {
-	req, err := http.NewRequest("DELETE", c.URL+uri, nil)
+func (c *Client) Delete(ctx context.Context, uri string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, "DELETE", c.URL+uri, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new request: %v", err)
 	}
@@ -242,6 +243,6 @@ func (c *Client) Delete(uri string) ([]byte, error) {
 }
 
 // Update wraps the post function passing the URI and body to update.
-func (c *Client) Update(uri string, body map[string]interface{}) ([]byte, error) {
-	return c.post(uri, body)
+func (c *Client) Update(ctx context.Context, uri string, body map[string]interface{}) ([]byte, error) {
+	return c.post(ctx, uri, body)
 }

@@ -1,9 +1,12 @@
 package gosolar
 
-import "fmt"
+import (
+    "fmt"
+    "context"
+)
 
 // BulkSetCustomProperty sets a custom property on a series of URIs.
-func (c *Client) BulkSetCustomProperty(uris []string, name string, value interface{}) error {
+func (c *Client) BulkSetCustomProperty(ctx context.Context, uris []string, name string, value interface{}) error {
 	// load up the uris that are going to be affected
 	var cpuris []string
 	for _, uri := range uris {
@@ -20,7 +23,7 @@ func (c *Client) BulkSetCustomProperty(uris []string, name string, value interfa
 		},
 	}
 
-	_, err := c.post("BulkUpdate", &bulkRequest)
+	_, err := c.post(ctx, "BulkUpdate", &bulkRequest)
 	if err != nil {
 		return fmt.Errorf("failed to post bulk update: %v", err)
 	}
@@ -29,12 +32,12 @@ func (c *Client) BulkSetCustomProperty(uris []string, name string, value interfa
 }
 
 // SetCustomProperty sets a custom property value on a specific URI.
-func (c *Client) SetCustomProperty(uri, name string, value interface{}) error {
+func (c *Client) SetCustomProperty(ctx context.Context, uri, name string, value interface{}) error {
 	property := map[string]interface{}{
 		name: value,
 	}
 
-	_, err := c.post(uri+"/CustomProperties", &property)
+	_, err := c.post(ctx, uri+"/CustomProperties", &property)
 	if err != nil {
 		return fmt.Errorf("failed to update custom property: %v", err)
 	}
@@ -43,8 +46,8 @@ func (c *Client) SetCustomProperty(uri, name string, value interface{}) error {
 }
 
 // SetCustomProperties sets multiple properties on an entity.
-func (c *Client) SetCustomProperties(uri string, properties map[string]interface{}) error {
-	_, err := c.post(uri+"/CustomProperties", &properties)
+func (c *Client) SetCustomProperties(ctx context.Context, uri string, properties map[string]interface{}) error {
+	_, err := c.post(ctx, uri+"/CustomProperties", &properties)
 	if err != nil {
 		return fmt.Errorf("failed to update custom property: %v", err)
 	}
@@ -53,7 +56,7 @@ func (c *Client) SetCustomProperties(uri string, properties map[string]interface
 }
 
 // CreateCustomProperty creates a new custom property of a specified type.
-func (c *Client) CreateCustomProperty(cpEntity, cpType, cpName, cpDesc string) error {
+func (c *Client) CreateCustomProperty(ctx context.Context, cpEntity, cpType, cpName, cpDesc string) error {
 	var cpLength string
 
 	if cpType == "string" {
@@ -80,7 +83,7 @@ func (c *Client) CreateCustomProperty(cpEntity, cpType, cpName, cpDesc string) e
 
 	endpoint := fmt.Sprintf("Invoke/%s/CreateCustomProperty", cpEntity)
 
-	_, err := c.post(endpoint, &props)
+	_, err := c.post(ctx, endpoint, &props)
 	if err != nil {
 		return fmt.Errorf("failed to create custom property: %v", err)
 	}
