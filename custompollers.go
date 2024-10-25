@@ -3,6 +3,7 @@ package gosolar
 import (
 	"encoding/json"
 	"fmt"
+	"context"
 )
 
 // Assignment holds all the current UnDP configuration from SolarWinds.
