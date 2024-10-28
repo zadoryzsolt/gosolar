@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/mrxinu/gosolar"
+	"github.com/zadoryzsolt/gosolar"
 )
 
 func main() {
@@ -16,6 +17,8 @@ func main() {
 	// NewClient creates a client that will handle the connection to SolarWinds
 	// along with the timeout and HTTP conversation.
 	client := gosolar.NewClient(hostname, username, password, true)
+
+	ctx := context.Background()
 
 	// put the query into a string using a multi-line string assignment
 	query := `
@@ -35,7 +38,7 @@ func main() {
 	}
 
 	// run the query without with the parameters map above
-	res, err := client.Query(query, parameters)
+	res, err := client.Query(ctx, query, parameters)
 	if err != nil {
 		log.Fatal(err)
 	}

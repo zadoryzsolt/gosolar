@@ -1,9 +1,9 @@
 package gosolar
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"context"
 )
 
 // Assignment holds all the current UnDP configuration from SolarWinds.
@@ -18,7 +18,7 @@ type Assignment struct {
 
 // GetAssignments function returns all the current custom poller assignments
 // in effect at the time.
-func (c *Client) GetAssignments() ([]Assignment, error) {
+func (c *Client) GetAssignments(ctx context.Context) ([]Assignment, error) {
 	query := `
 		SELECT
 			CustomPollerAssignmentID
@@ -30,7 +30,7 @@ func (c *Client) GetAssignments() ([]Assignment, error) {
 		FROM Orion.NPM.CustomPollerAssignment
 	`
 
-	res, err := c.Query(query, nil)
+	res, err := c.Query(ctx, query, nil)
 	if err != nil {
 		return []Assignment{}, fmt.Errorf("failed to query for assignments: %v", err)
 	}
@@ -44,7 +44,7 @@ func (c *Client) GetAssignments() ([]Assignment, error) {
 }
 
 // AddNodePoller adds a Universal Device Poller (UnDP) to a node.
-func (c *Client) AddNodePoller(customPollerID string, nodeID int) error {
+func (c *Client) AddNodePoller(ctx context.Context, customPollerID string, nodeID int) error {
 	entity := "Orion.NPM.CustomPollerAssignmentOnNode"
 
 	request := struct {
@@ -55,7 +55,7 @@ func (c *Client) AddNodePoller(customPollerID string, nodeID int) error {
 		CustomPollerID: customPollerID,
 	}
 
-	_, err := c.post("Create/"+entity, request)
+	_, err := c.post(ctx, "Create/"+entity, request)
 	if err != nil {
 		return fmt.Errorf("failed to add poller: %v", err)
 	}
@@ -64,7 +64,7 @@ func (c *Client) AddNodePoller(customPollerID string, nodeID int) error {
 }
 
 // AddInterfacePoller adds a Universal Device Poller (UnDP) to an interface.
-func (c *Client) AddInterfacePoller(customPollerID string, interfaceID int) error {
+func (c *Client) AddInterfacePoller(ctx context.Context, customPollerID string, interfaceID int) error {
 	entity := "Orion.NPM.CustomPollerAssignmentOnInterface"
 
 	request := struct {
@@ -75,7 +75,7 @@ func (c *Client) AddInterfacePoller(customPollerID string, interfaceID int) erro
 		CustomPollerID: customPollerID,
 	}
 
-	_, err := c.post("Create/"+entity, request)
+	_, err := c.post(ctx, "Create/"+entity, request)
 	if err != nil {
 		return fmt.Errorf("failed to add poller: %v", err)
 	}

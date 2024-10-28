@@ -2,12 +2,11 @@ package gosolar
 
 import (
 	"bytes"
-	"crypto/tls"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -59,7 +58,7 @@ func (c *Client) post(ctx context.Context, endpoint string, body interface{}) ([
 		return nil, fmt.Errorf("failed to submit query: %v", err)
 	}
 
-	output, err := ioutil.ReadAll(res.Body)
+	output, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("query failed - status code %d: %v", res.StatusCode, err)
 	}
@@ -86,14 +85,14 @@ func (c *Client) get(ctx context.Context, endpoint string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to submit query: %v", err)
 	}
 	defer func() {
-		io.Copy(ioutil.Discard, res.Body)
+		io.Copy(io.Discard, res.Body)
 		err2 := res.Body.Close()
 		if err2 != nil {
 			log.Fatalf("failed to close result body: %v", err2)
 		}
 	}()
 
-	output, err := ioutil.ReadAll(res.Body)
+	output, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("query failed - status code %d: %v", res.StatusCode, err)
 	}
@@ -142,7 +141,7 @@ func (c *Client) QueryOne(ctx context.Context, query string, parameters interfac
 
 	m := make(map[string]interface{})
 
-	if json.Unmarshal(res, &m); err != nil {
+	if err = json.Unmarshal(res, &m); err != nil {
 		return nil, fmt.Errorf("could not unmarshal the result: %v", err)
 	}
 
@@ -174,7 +173,7 @@ func (c *Client) QueryColumn(ctx context.Context, query string, parameters inter
 
 	var rows []map[string]interface{}
 
-	if json.Unmarshal(res, &rows); err != nil {
+	if err = json.Unmarshal(res, &rows); err != nil {
 		return nil, fmt.Errorf("could not unmarshal the result: %v", err)
 	}
 
@@ -228,7 +227,7 @@ func (c *Client) Delete(ctx context.Context, uri string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to delete: %v", err)
 	}
 
-	output, err := ioutil.ReadAll(res.Body)
+	output, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("delete failed - status code %d: %v", res.StatusCode, err)
 	}
