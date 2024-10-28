@@ -1,8 +1,8 @@
 package gosolar
 
 import (
-    "fmt"
-    "context"
+	"context"
+	"fmt"
 )
 
 // RemoveNCMNodes deletes nodes from NCM handling in SolarWinds.

@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/mrxinu/gosolar"
+	"github.com/zadoryzsolt/gosolar"
 )
 
 func main() {
@@ -17,8 +18,10 @@ func main() {
 	// along with the timeout and HTTP conversation.
 	client := gosolar.NewClient(hostname, username, password, true)
 
+	ctx := context.Background()
+
 	// run the query without any parameters by passing nil as the 2nd parameter
-	res, err := client.Query("SELECT Caption, IPAddress FROM Orion.Nodes", nil)
+	res, err := client.Query(ctx, "SELECT Caption, IPAddress FROM Orion.Nodes", nil)
 	if err != nil {
 		log.Fatal(err)
 	}

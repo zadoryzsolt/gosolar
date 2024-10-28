@@ -1,8 +1,8 @@
 package gosolar
 
 import (
-    "fmt"
-    "context"
+	"context"
+	"fmt"
 )
 
 // BulkSetCustomProperty sets a custom property on a series of URIs.
