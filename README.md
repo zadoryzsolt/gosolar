@@ -1,6 +1,6 @@
 # gosolar
 
-[![GoDoc](https://godoc.org/github.com/mrxinu/gosolar?status.png)](http://godoc.org/github.com/mrxinu/gosolar) [![Go Report Card](https://goreportcard.com/badge/github.com/mrxinu/gosolar)](https://goreportcard.com/report/github.com/mrxinu/gosolar) [![Build Status](https://travis-ci.com/mrxinu/gosolar.svg?branch=master)](https://travis-ci.com/mrxinu/gosolar)
+[![GoDoc](https://godoc.org/github.com/zadoryzsolt/gosolar?status.png)](http://godoc.org/github.com/zadoryzsolt/gosolar) [![Go Report Card](https://goreportcard.com/badge/github.com/zadoryzsolt/gosolar)](https://goreportcard.com/report/github.com/zadoryzsolt/gosolar)
 
 GoSolar is a SolarWinds client library written in Go. It allows you to submit
 queries to the SolarWinds Information Service (SWIS) and do various other
@@ -8,7 +8,7 @@ things.
 
 ## About
 
-**mrxinu/gosolar** is a wrapper around REST calls to the SWIS and makes working
+**zadoryzsolt/gosolar** is a wrapper around REST calls to the SWIS and makes working
 with a SolarWinds install a little easier.
 
 ## Overview
@@ -48,13 +48,13 @@ GoSolar has the following convenience methods:
 Install via **go get**:
 
 ```shell
-go get -u github.com/mrxinu/gosolar
+go get -u github.com/zadoryzsolt/gosolar
 ```
 
 ## Documentation
 
 See
-[http://godoc.org/github.com/mrxinu/gosolar](http://godoc.org/github.com/mrxinu/gosolar)
+[http://godoc.org/github.com/zadoryzsolt/gosolar](http://godoc.org/github.com/zadoryzsolt/gosolar)
 or your local go doc server for full documentation, as well as the examples.
 
 ```shell
@@ -75,8 +75,9 @@ import (
     "encoding/json"
     "fmt"
     "log"
+    "context"
 
-    "github.com/mrxinu/gosolar"
+    "github.com/zadoryzsolt/gosolar"
 )
 
 func main() {
@@ -88,8 +89,10 @@ func main() {
     // along with the timeout and HTTP conversation.
     client := gosolar.NewClient(hostname, username, password, true)
 
+    ctx := context.Background()
+
     // run the query without any parameters by passing nil as the 2nd parameter
-    res, err := client.Query("SELECT Caption, IPAddress FROM Orion.Nodes", nil)
+    res, err := client.Query(ctx, "SELECT Caption, IPAddress FROM Orion.Nodes", nil)
     if err != nil {
         log.Fatal(err)
     }
@@ -114,5 +117,5 @@ func main() {
 
 ## Bugs
 
-Please create an [issue](https://github.com/mrxinu/gosolar/issues) on GitHub
+Please create an [issue](https://github.com/zadoryzsolt/gosolar/issues) on GitHub
 with details about the bug and steps to reproduce it.
